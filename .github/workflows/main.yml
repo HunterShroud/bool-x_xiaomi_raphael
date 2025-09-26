@@ -10,13 +10,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Confirm workflow triggered
         run: echo "✅ GitHub Actions workflow triggered successfully!"
 
       - name: Install build dependencies
-        run: sudo apt-get update && sudo apt-get install -y bc bison flex libssl-dev
+        run: sudo apt-get update && sudo apt-get install -y bc bison flex libssl-dev zip
 
       - name: Build Kernel
         run: |
@@ -24,7 +24,7 @@ jobs:
           export CROSS_COMPILE=aarch64-linux-android-
           make raphael_defconfig
 
-          # Disable signature verification + enable modules
+          # Adjust kernel config
           ./scripts/config --set-val CONFIG_MODULES y
           ./scripts/config --set-val CONFIG_MODULE_UNLOAD y
           ./scripts/config --set-val CONFIG_MODVERSIONS y
@@ -32,21 +32,4 @@ jobs:
           ./scripts/config --disable CONFIG_MODULE_SIG_ALL
           ./scripts/config --set-str CONFIG_MODULE_SIG_KEY ""
           ./scripts/config --disable CONFIG_IMA
-          ./scripts/config --disable CONFIG_IMA_APPRAISE
-          ./scripts/config --disable CONFIG_LOCK_DOWN_LSM || true
-
-          # Refresh config
-          make olddefconfig
-
-          # Build kernel (adjust to match your tree)
-          make -j$(nproc)
-
-      - name: Upload Kernel Artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: compiled-kernel
-          path: |
-            arch/arm64/boot/Image
-            arch/arm64/boot/Image.gz
-            arch/arm64/boot/Image.gz-dtb
-            arch/arm64/boot/zImage
+          ./script
